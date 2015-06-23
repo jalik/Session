@@ -152,7 +152,9 @@
 
             for (var i = 0; i < array.length; i += 1) {
                 var cookie = array[i].split('=');
-                cookies[cookie[0]] = cookie[1];
+                if (typeof cookie[0] === 'string' && cookie[0].length > 0) {
+                    cookies[cookie[0]] = cookie[1];
+                }
             }
             return cookies;
         },

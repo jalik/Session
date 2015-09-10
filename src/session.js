@@ -74,12 +74,15 @@
          * @param domain
          */
         createCookie: function (name, value, expires, path, domain) {
+            if (value == null) {
+                value = '';
+            }
             // Stringify the object
             if (typeof  value === 'object') {
                 if (value instanceof Date) {
                     value = 'DATE:' + value.getTime();
                 } else {
-                    value = 'JSON:' + JSON.stringify(value);
+                    value = 'JSON:' + encodeURIComponent(JSON.stringify(value));
                 }
             }
             // Prepare the value
@@ -172,7 +175,7 @@
 
                     // Parse object
                     if (value.indexOf('JSON:') === 0) {
-                        value = JSON.parse(value.substr(5));
+                        value = JSON.parse(decodeURIComponent(value.substr(5)));
 
                     } else if (value.indexOf('DATE:') === 0) {
                         value = new Date(parseInt(value.substr(5)));

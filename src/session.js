@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Karl STEIN
+ * Copyright (c) 2016 Karl STEIN
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,24 @@
  *
  */
 
-(function () {
-    'use strict';
+(function (root, factory) {
+    var f = factory();
+
+    // Export module to AMD
+    if (typeof define === 'function' && define.amd) {
+        define([], function () {
+            return root.Session = f;
+        });
+    }
+    // Export module to NodeJS/CommonJS
+    else if (typeof module === 'object' && module.exports) {
+        module.exports = {Session: f};
+    }
+    // Export module to root/window
+    else {
+        root.Session = f;
+    }
+}(this, function () {
 
     /**
      * Contains session data
@@ -35,7 +51,7 @@
      * Session object
      * @constructor
      */
-    window.Session = {
+    var Session = {
         /**
          * The domain where the values are stored
          */
@@ -56,11 +72,11 @@
          */
         clear: function () {
             data = {};
-            var cookies = this.getCookies();
+            var cookies = Session.getCookies();
 
             for (var name in cookies) {
                 if (cookies.hasOwnProperty(name)) {
-                    this.remove(name);
+                    Session.remove(name);
                 }
             }
         },
@@ -112,7 +128,7 @@
          * @param domain
          */
         deleteCookie: function (name, path, domain) {
-            this.createCookie(name, '', 0, path, domain);
+            Session.createCookie(name, '', 0, path, domain);
         },
 
         /**
@@ -141,7 +157,7 @@
          * @return {*}
          */
         getCookie: function (name) {
-            var cookies = this.getCookies();
+            var cookies = Session.getCookies();
             return cookies && cookies[name];
         },
 
@@ -192,7 +208,7 @@
          */
         remove: function (name) {
             delete data[name];
-            this.deleteCookie(name, this.path, this.domain);
+            Session.deleteCookie(name, Session.path, Session.domain);
         },
 
         /**
@@ -202,11 +218,12 @@
          */
         set: function (name, value) {
             data[name] = value;
-            this.createCookie(name, value, this.expires, this.path, this.domain);
+            Session.createCookie(name, value, Session.expires, Session.path, Session.domain);
         }
     };
 
-    // Load cookies
+    // Load session data
     Session.load();
 
-})();
+    return Session;
+}));

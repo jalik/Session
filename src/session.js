@@ -72,11 +72,11 @@
          */
         clear: function () {
             data = {};
-            var cookies = Session.getCookies();
+            var cookies = this.getCookies();
 
             for (var name in cookies) {
                 if (cookies.hasOwnProperty(name)) {
-                    Session.remove(name);
+                    this.remove(name);
                 }
             }
         },
@@ -128,7 +128,7 @@
          * @param domain
          */
         deleteCookie: function (name, path, domain) {
-            Session.createCookie(name, '', 0, path, domain);
+            this.createCookie(name, '', 0, path, domain);
         },
 
         /**
@@ -147,8 +147,12 @@
          * @return {*}
          */
         get: function (name, defaultValue) {
-            var value = data[name];
-            return value !== null && value !== undefined ? value : defaultValue;
+            if (name) {
+                var value = data[name];
+                return value !== null && value !== undefined ? value : defaultValue;
+            } else {
+                return this.load();
+            }
         },
 
         /**
@@ -157,7 +161,7 @@
          * @return {*}
          */
         getCookie: function (name) {
-            var cookies = Session.getCookies();
+            var cookies = this.getCookies();
             return cookies && cookies[name];
         },
 
@@ -179,11 +183,26 @@
         },
 
         /**
+         * Returns a JSON value
+         * @param name
+         * @param defaultValue
+         * @returns {*}
+         */
+        getJSON: function (name, defaultValue) {
+            if (name) {
+                var value = data[name];
+                return typeof value === 'string' ? JSON.parse(value) : defaultValue;
+            } else {
+                return this.load();
+            }
+        },
+
+        /**
          * Loads session data
          * @return {{}}
          */
         load: function () {
-            var cookies = Session.getCookies();
+            var cookies = this.getCookies();
 
             for (var name in cookies) {
                 if (cookies.hasOwnProperty(name)) {
@@ -208,7 +227,7 @@
          */
         remove: function (name) {
             delete data[name];
-            Session.deleteCookie(name, Session.path, Session.domain);
+            this.deleteCookie(name, this.path, this.domain);
         },
 
         /**
@@ -218,7 +237,7 @@
          */
         set: function (name, value) {
             data[name] = value;
-            Session.createCookie(name, value, Session.expires, Session.path, Session.domain);
+            this.createCookie(name, value, this.expires, this.path, this.domain);
         }
     };
 

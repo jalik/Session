@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Karl STEIN
+ * Copyright (c) 2017 Karl STEIN
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,35 +23,18 @@
  *
  */
 
-(function (root, factory) {
-    var f = factory();
-
-    // Export module to AMD
-    if (typeof define === 'function' && define.amd) {
-        define([], function () {
-            return root.Session = f;
-        });
-    }
-    // Export module to NodeJS/CommonJS
-    else if (typeof module === 'object' && module.exports) {
-        module.exports = {Session: f};
-    }
-    // Export module to root/window
-    else {
-        root.Session = f;
-    }
-}(this, function () {
+(function (window) {
 
     /**
      * Contains session data
      */
-    var data = {};
+    let data = {};
 
     /**
      * Session object
      * @constructor
      */
-    var Session = {
+    const Session = {
         /**
          * The domain where the values are stored
          */
@@ -65,16 +48,16 @@
         /**
          * The path where the values are stored
          */
-        path: '/',
+        path: "/",
 
         /**
          * Removes all cookies
          */
-        clear: function () {
+        clear() {
             data = {};
-            var cookies = this.getCookies();
+            const cookies = this.getCookies();
 
-            for (var name in cookies) {
+            for (let name in cookies) {
                 if (cookies.hasOwnProperty(name)) {
                     this.remove(name);
                 }
@@ -89,34 +72,34 @@
          * @param path
          * @param domain
          */
-        createCookie: function (name, value, expires, path, domain) {
-            if (value == null) {
-                value = '';
+        createCookie(name, value, expires, path, domain) {
+            if (value === null || value === undefined) {
+                value = "";
             }
             // Stringify the object
-            if (typeof  value === 'object') {
+            if (typeof  value === "object") {
                 if (value instanceof Date) {
-                    value = 'DATE:' + value.getTime();
+                    value = "DATE:" + value.getTime();
                 } else {
-                    value = 'JSON:' + encodeURIComponent(JSON.stringify(value));
+                    value = "JSON:" + encodeURIComponent(JSON.stringify(value));
                 }
             }
             // Prepare the value
-            var cookie = name + '=' + value;
+            let cookie = name + "=" + value;
 
             // Define the expiration date
-            if (typeof expires === 'number') {
-                cookie += '; expires=' + new Date(expires).toUTCString();
+            if (typeof expires === "number") {
+                cookie += "; expires=" + new Date(expires).toUTCString();
             } else if (expires instanceof Date) {
-                cookie += '; expires=' + expires.toUTCString();
+                cookie += "; expires=" + expires.toUTCString();
             }
             // Define the path
-            if (typeof path === 'string') {
-                cookie += '; path=' + path;
+            if (typeof path === "string") {
+                cookie += "; path=" + path;
             }
             // Define the domain
-            if (typeof domain === 'string') {
-                cookie += '; domain=' + domain;
+            if (typeof domain === "string") {
+                cookie += "; domain=" + domain;
             }
             document.cookie = cookie;
         },
@@ -127,8 +110,8 @@
          * @param path
          * @param domain
          */
-        deleteCookie: function (name, path, domain) {
-            this.createCookie(name, '', 0, path, domain);
+        deleteCookie(name, path, domain) {
+            this.createCookie(name, "", 0, path, domain);
         },
 
         /**
@@ -136,7 +119,7 @@
          * @param name
          * @return {boolean}
          */
-        exists: function (name) {
+        exists(name) {
             return data[name] !== undefined;
         },
 
@@ -146,9 +129,9 @@
          * @param defaultValue
          * @return {*}
          */
-        get: function (name, defaultValue) {
+        get(name, defaultValue) {
             if (name) {
-                var value = data[name];
+                const value = data[name];
                 return value !== null && value !== undefined ? value : defaultValue;
             } else {
                 return this.load();
@@ -160,8 +143,8 @@
          * @param name
          * @return {*}
          */
-        getCookie: function (name) {
-            var cookies = this.getCookies();
+        getCookie(name) {
+            const cookies = this.getCookies();
             return cookies && cookies[name];
         },
 
@@ -169,13 +152,14 @@
          * Returns all cookies
          * @return {{}}
          */
-        getCookies: function () {
-            var array = document.cookie.split('; ');
-            var cookies = {};
+        getCookies() {
+            const array = document.cookie.split("; ");
+            const cookies = {};
 
-            for (var i = 0; i < array.length; i += 1) {
-                var cookie = array[i].split('=');
-                if (typeof cookie[0] === 'string' && cookie[0].length > 0) {
+            for (let i = 0; i < array.length; i += 1) {
+                const cookie = array[i].split("=");
+
+                if (typeof cookie[0] === "string" && cookie[0].length > 0) {
                     cookies[cookie[0]] = cookie[1];
                 }
             }
@@ -188,10 +172,10 @@
          * @param defaultValue
          * @returns {*}
          */
-        getJSON: function (name, defaultValue) {
+        getJSON(name, defaultValue) {
             if (name) {
-                var value = data[name];
-                return typeof value === 'string' ? JSON.parse(value) : defaultValue;
+                const value = data[name];
+                return typeof value === "string" ? JSON.parse(value) : defaultValue;
             } else {
                 return this.load();
             }
@@ -201,18 +185,18 @@
          * Loads session data
          * @return {{}}
          */
-        load: function () {
-            var cookies = this.getCookies();
+        load() {
+            const cookies = this.getCookies();
 
-            for (var name in cookies) {
+            for (let name in cookies) {
                 if (cookies.hasOwnProperty(name)) {
-                    var value = cookies[name];
+                    let value = cookies[name];
 
                     // Parse object
-                    if (value.indexOf('JSON:') === 0) {
+                    if (value.indexOf("JSON:") === 0) {
                         value = JSON.parse(decodeURIComponent(value.substr(5)));
 
-                    } else if (value.indexOf('DATE:') === 0) {
+                    } else if (value.indexOf("DATE:") === 0) {
                         value = new Date(parseInt(value.substr(5)));
                     }
                     data[name] = value;
@@ -225,7 +209,7 @@
          * Removes a stored value
          * @param name
          */
-        remove: function (name) {
+        remove(name) {
             delete data[name];
             this.deleteCookie(name, this.path, this.domain);
         },
@@ -235,7 +219,7 @@
          * @param name
          * @param value
          */
-        set: function (name, value) {
+        set(name, value) {
             data[name] = value;
             this.createCookie(name, value, this.expires, this.path, this.domain);
         }
@@ -244,5 +228,8 @@
     // Load session data
     Session.load();
 
-    return Session;
-}));
+    if (window) {
+        window.Session = Session;
+    }
+
+})(window);
